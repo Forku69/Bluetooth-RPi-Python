@@ -14,7 +14,7 @@ class SerialComm:
         self.port = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)
  
     def read_serial(self):
-        res = self.port.read(50)
+        res = self.port.read(150)
         if len(res):
             return res.splitlines()
         else:
@@ -84,23 +84,12 @@ class SerialComm:
         print cmd + " - " + str(cmd_result)
 
 
-        # restart wifi adapter
-        cmd = sudo_mode + 'ifdown wlan0'
+        # reconfigure wifi adapter
+        cmd = sudo_mode + 'wpa_cli -i wlan0 reconfigure'
         cmd_result = os.system(cmd)
         print cmd + " - " + str(cmd_result)
-
-        time.sleep(2)
-
-        cmd = sudo_mode + 'ifup wlan0'
-        cmd_result = os.system(cmd)
-        print cmd + " - " + str(cmd_result)
-
-        time.sleep(10)
-
-        cmd = 'iwconfig wlan0'
-        cmd_result = os.system(cmd)
-        print cmd + " - " + str(cmd_result)
-
+	
+	time.sleep(10)
         cmd = 'ifconfig wlan0'
         cmd_result = os.system(cmd)
         print cmd + " - " + str(cmd_result)
@@ -111,10 +100,9 @@ class SerialComm:
         out, err = p.communicate()
 
         ip_address = "<Not Set>"
-    
         for l in out.split('\n'):
-            if l.strip().startswith("inet addr:"):
-                ip_address = l.strip().split(' ')[1].split(':')[1]
+            if l.strip().startswith("inet "):
+                ip_address = l.strip().split(' ')[1]
                 
         return ip_address
  
